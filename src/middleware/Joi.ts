@@ -4,10 +4,11 @@ import { IAuthor } from '../models/Author';
 import { BOOK_LANGUAGES, BOOK_TAGS, IBook } from '../models/Book';
 import Logging from '../library/Logging';
 
-export const ValidateJoi = (schema: ObjectSchema) => {
+export const ValidateJoi = (schema: ObjectSchema, paramName?: string) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await schema.validateAsync(req.body);
+            const value = paramName ? { [paramName]: req.params[paramName] } : req.body;
+            await schema.validateAsync(value);
 
             next();
         } catch (error) {
@@ -62,6 +63,15 @@ export const Schemas = {
         })
     },
     book: {
+        addTag: Joi.object({
+            tag: Joi.string().valid(...BOOK_TAGS).required()
+        }),
+        deleteTag: Joi.object({
+            tag: Joi.string().valid(...BOOK_TAGS).required()
+        }),
+        replaceTags: Joi.object({
+            tags: Joi.array().items(Joi.string().valid(...BOOK_TAGS)).required()
+        }),
         create: Joi.object<IBook>({
             title: Joi.string().required(),
             authors: Joi.array()

@@ -1,4 +1,6 @@
 
+import { BOOK_TAGS } from '../models/Book';
+
 // Función que crea un parámetro para los IDs de MongoDB.
 // La usamos en las rutas que necesitan recibir un ID por la URL.
 
@@ -19,6 +21,7 @@ const objectIdParameter = (name: string) => ({
         pattern: '^[0-9a-fA-F]{24}$'
     }
 });
+
 
 // Respuesta que utilizaremos cuando no se encuentre
 // el autor o libro que estamos buscando.
@@ -423,6 +426,71 @@ const swaggerDocument = {
 
 
         // -------------------------------------------------
+        '/books/{bookId}/tags': {
+            parameters: [objectIdParameter('bookId')],
+            post: {
+                tags: ['Books'],
+                summary: 'Add a tag to a book',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/BookTagInput' }
+                        }
+                    }
+                },
+                responses: {
+                    '200': { description: 'Tag added; returns the updated book with authors' },
+                    '400': { description: 'Invalid MongoDB id' },
+                    '404': notFoundResponse,
+                    '422': { description: 'Validation error' },
+                    '500': serverErrorResponse
+                }
+            },
+            put: {
+                tags: ['Books'],
+                summary: 'Replace a book\'s tags',
+                requestBody: {
+                    required: true,
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/BookTagsInput' }
+                        }
+                    }
+                },
+                responses: {
+                    '200': { description: 'Tags replaced; returns the updated book with authors' },
+                    '400': { description: 'Invalid MongoDB id' },
+                    '404': notFoundResponse,
+                    '422': { description: 'Validation error' },
+                    '500': serverErrorResponse
+                }
+            }
+        },
+
+        '/books/{bookId}/tags/{tag}': {
+            parameters: [
+                objectIdParameter('bookId'),
+                {
+                    name: 'tag',
+                    in: 'path',
+                    required: true,
+                    schema: { type: 'string', enum: BOOK_TAGS }
+                }
+            ],
+            delete: {
+                tags: ['Books'],
+                summary: 'Remove a tag from a book',
+                responses: {
+                    '200': { description: 'Tag removed; returns the updated book with authors' },
+                    '400': { description: 'Invalid MongoDB id' },
+                    '404': notFoundResponse,
+                    '422': { description: 'Invalid tag' },
+                    '500': serverErrorResponse
+                }
+            }
+        },
+
         // LIBROS POR ID
         // -------------------------------------------------
 
@@ -647,6 +715,35 @@ const swaggerDocument = {
                         pattern: '^[0-9a-fA-F]{24}$',
 
                         example: '507f1f77bcf86cd799439011'
+                    }
+                }
+            },
+
+            BookTagInput: {
+                type: 'object',
+                required: ['tag'],
+                additionalProperties: false,
+                properties: {
+                    tag: {
+                        type: 'string',
+                        enum: BOOK_TAGS,
+                        example: BOOK_TAGS[0]
+                    }
+                }
+            },
+
+            BookTagsInput: {
+                type: 'object',
+                required: ['tags'],
+                additionalProperties: false,
+                properties: {
+                    tags: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                            enum: BOOK_TAGS
+                        },
+                        example: [BOOK_TAGS[1], BOOK_TAGS[2]]
                     }
                 }
             },

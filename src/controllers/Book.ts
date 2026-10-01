@@ -51,6 +51,54 @@ const updateBook = async (req: Request<{ bookId: string }>, res: Response) => {
     }
 };
 
+const addTag = async (req: Request<{ bookId: string }>, res: Response) => {
+    const bookId = req.params.bookId;
+
+    try {
+        const book = await BookService.addTag(bookId, req.body.tag);
+
+        if (book) {
+            res.status(200).json({ book });
+        } else {
+            res.status(404).json({ message: 'not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
+const replaceTags = async (req: Request<{ bookId: string }>, res: Response) => {
+    const bookId = req.params.bookId;
+
+    try {
+        const book = await BookService.replaceTags(bookId, req.body.tags);
+
+        if (book) {
+            res.status(200).json({ book });
+        } else {
+            res.status(404).json({ message: 'not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
+const removeTag = async (req: Request<{ bookId: string; tag: string }>, res: Response) => {
+    const { bookId, tag } = req.params;
+
+    try {
+        const book = await BookService.removeTag(bookId, tag);
+
+        if (book) {
+            res.status(200).json({ book });
+        } else {
+            res.status(404).json({ message: 'not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error });
+    }
+};
+
 const deleteBook = async (req: Request<{ bookId: string }>, res: Response) => {
     const bookId = req.params.bookId;
 
@@ -67,4 +115,4 @@ const deleteBook = async (req: Request<{ bookId: string }>, res: Response) => {
     }
 };
 
-export default { createBook, readBook, readAll, updateBook, deleteBook };
+export default { createBook, readBook, readAll, updateBook, addTag, replaceTags, removeTag, deleteBook };
